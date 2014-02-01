@@ -17,12 +17,9 @@ PubSub.prototype.subscribe = function(eventName, handler) {
     if (!this.events[eventName]) {
         this.events[eventName] = [];
     }
-    if (handler !== undefined) {
-        this.events[eventName].push({
-            handler: handler
-        });
-        return handler;
-    }
+    this.events[eventName].push(handler);
+    return handler;
+
 };
 
 /**
@@ -32,14 +29,11 @@ PubSub.prototype.subscribe = function(eventName, handler) {
  * @return {function}         ссылка на handler
  */
 PubSub.prototype.unsubscribe = function(eventName, handler) {
-    for (var i = 0; i < this.events[eventName].length; i++) {
-        var obj = this.events[eventName][i];
-        if (obj['handler'] == handler) {
-            this.events[eventName].splice(i, 1);
-            break;
-        }
+    var index = this.events[eventName].indexOf(handler);
+    if (index != -1) {
+        this.events[eventName].splice(index, 1);
+        return handler;
     }
-    return handler;
 };
 
 /**
@@ -52,12 +46,12 @@ PubSub.prototype.publish = function(eventName, data) {
     if (this.events[eventName] === (undefined || this.events[eventName].length === 0)) {
         return false;
     } else {
-        for (var i = 0; i < this.events[eventName].length; i++) {
-          var obj = this.events[eventName][i];
-          setTimeout(obj.handler(data), 10);
-        }
+        this.events[eventName].forEach(function(handler) {
+            setTimeout(handler(data), 10);
+        });
+        return true;
     }
-    return true;
+
 };
 
 /**
@@ -95,12 +89,20 @@ PubSub.prototype.off = function(eventName) {
 var PubSub = new PubSub();
 
 Function.prototype.subscribe = function(eventName) {
-    PubSub.subscribe(eventName, this);
-    return this;
+    if (PubSub.subscribe(eventName, this)) {
+        return true;
+    } else {
+        return false;
+    }
+
 };
 Function.prototype.unsubscribe = function(eventName) {
-    PubSub.unsubscribe(eventName, this);
-    return this;
+    if (PubSub.unsubscribe(eventName, this)) {
+        return true;
+    } else {
+        return false;
+    }
+
 };
 
 function foo(event, data) {
