@@ -2,8 +2,10 @@
  * Конструктор класса обмена сообщениями
  * @constructor
  */
-function PubSub(){
-};
+
+function PubSub() {
+    this.events = {};
+}
 
 /**
  * Функция подписки на событие
@@ -12,7 +14,15 @@ function PubSub(){
  * @return {function}         ссылка на handler
  */
 PubSub.prototype.subscribe = function(eventName, handler) {
-    return handler;
+    if (!this.events[eventName]) {
+        this.events[eventName] = [];
+    }
+    if (handler !== undefined) {
+        this.events[eventName].push({
+            handler: handler
+        });
+        return handler;
+    }
 };
 
 /**
@@ -22,6 +32,13 @@ PubSub.prototype.subscribe = function(eventName, handler) {
  * @return {function}         ссылка на handler
  */
 PubSub.prototype.unsubscribe = function(eventName, handler) {
+    for (var i = 0; i < this.events[eventName].length; i++) {
+        var obj = this.events[eventName][i];
+        if (obj['handler'] == handler) {
+            this.events[eventName].splice(i, 1);
+            break;
+        }
+    }
     return handler;
 };
 
@@ -32,7 +49,15 @@ PubSub.prototype.unsubscribe = function(eventName, handler) {
  * @return {bool}             удачен ли результат операции
  */
 PubSub.prototype.publish = function(eventName, data) {
-    return false;
+    if (this.events[eventName] === (undefined || this.events[eventName].length === 0)) {
+        return false;
+    } else {
+        for (var i = 0; i < this.events[eventName].length; i++) {
+          var obj = this.events[eventName][i];
+          setTimeout(obj.handler(data), 10);
+        }
+    }
+    return true;
 };
 
 /**
@@ -41,7 +66,12 @@ PubSub.prototype.publish = function(eventName, data) {
  * @return {bool}             удачен ли результат операции
  */
 PubSub.prototype.off = function(eventName) {
-    return false;
+    if (this.events[eventName]) {
+        this.events[eventName] = undefined;
+        return true;
+    } else {
+        return false;
+    }
 };
 
 /**
@@ -62,9 +92,21 @@ PubSub.prototype.off = function(eventName) {
     нужно заставить работать методы верно у любой функции
  */
 
+var PubSub = new PubSub();
+
+Function.prototype.subscribe = function(eventName) {
+    PubSub.subscribe(eventName, this);
+    return this;
+};
+Function.prototype.unsubscribe = function(eventName) {
+    PubSub.unsubscribe(eventName, this);
+    return this;
+};
+
 function foo(event, data) {
     //body…
 }
+
 
 foo.subscribe('click');
 
