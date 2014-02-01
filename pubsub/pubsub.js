@@ -17,8 +17,10 @@ PubSub.prototype.subscribe = function(eventName, handler) {
     if (!this.events[eventName]) {
         this.events[eventName] = [];
     }
-    this.events[eventName].push(handler);
-    return handler;
+    if (handler !== undefined) {
+        this.events[eventName].push(handler);
+        return handler;
+    }
 
 };
 
