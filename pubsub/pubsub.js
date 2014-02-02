@@ -91,20 +91,10 @@ PubSub.prototype.off = function(eventName) {
 var PubSub = new PubSub();
 
 Function.prototype.subscribe = function(eventName) {
-    if (PubSub.subscribe(eventName, this)) {
-        return true;
-    } else {
-        return false;
-    }
-
+    return PubSub.subscribe(eventName, this);
 };
 Function.prototype.unsubscribe = function(eventName) {
-    if (PubSub.unsubscribe(eventName, this)) {
-        return true;
-    } else {
-        return false;
-    }
-
+    return PubSub.unsubscribe(eventName, this);
 };
 
 function foo(event, data) {
