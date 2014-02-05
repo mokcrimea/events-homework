@@ -5,6 +5,13 @@
 
 function PubSub() {
     this.events = {};
+    that = this;
+    Function.prototype.subscribe = function(eventName) {
+        return that.subscribe(eventName, this);
+    };
+    Function.prototype.unsubscribe = function(eventName) {
+        return that.unsubscribe(eventName, this);
+    };
 }
 
 /**
@@ -90,17 +97,9 @@ PubSub.prototype.off = function(eventName) {
 
 var PubSub = new PubSub();
 
-Function.prototype.subscribe = function(eventName) {
-    return PubSub.subscribe(eventName, this);
-};
-Function.prototype.unsubscribe = function(eventName) {
-    return PubSub.unsubscribe(eventName, this);
-};
-
 function foo(event, data) {
     //body…
 }
-
 
 foo.subscribe('click');
 
